@@ -1,0 +1,45 @@
+
+	∂Ì ïÖUùHüö‰%æ «`›defVar --name googleDriveAccountName --type String --value "csmarques@gmail.com"
+defVar --name googleDrive --type FileSystem
+defVar --name fileList --type List --innertype String
+defVar --name fileListLenght --type Numeric
+defVar --name fileIndex --type Numeric --value 1
+defVar --name fileName --type String
+defVar --name fileNameWithoutPath --type String
+defVar --name PDFFile --type Pdf
+defVar --name email --type String
+defVar --name fileNameWithouExtension --type String
+defVar --name zipCode --type String
+defVar --name success --type Boolean
+
+goSub --label ProcessGDriveWeatherRequests
+
+beginSub --name processPDF
+downloadStorage --fileSystem ${googleDrive} --source "${fileName}" --target "${fileName}"
+pdfOpen --file "${fileName}" PDFFile=value
+logMessage --message "Gathering data from file via OCR" --type "Info"
+extractPdfText --page 1 --language "en-US" --searchregion "4,0,923,892" --anchor "Zip:" --anchorprovider "Google" --comparison "Equal_To" --segmentation "Word" --targetregion "37,-2,185,27" --targetprovider "Google" --file ${PDFFile} success=success zipCode=text
+extractPdfText --page 1 --language "en-US" --searchregion "25,22,902,855" --anchor "Email:" --anchorprovider "Google" --comparison "Equal_To" --segmentation "Word" --targetregion "52,-3,408,29" --targetprovider "Google" --file ${PDFFile} success=success email=text
+
+pdfClose --file ${PDFFile}
+endSub
+beginSub --name moveFiles
+getRegex --text "${fileName}" --regexPattern "([^/]*)$" --regexOptions "0" --comment "Get the file name without the PATH" fileNameWithoutPath=value
+getRegex --text "${fileNameWithoutPath}" --regexPattern ".+?(?=\\.)" --regexOptions "0" --comment "Get the filename without the path and extension" fileNameWithouExtension=value
+logMessage --message "Moving file to DONE folder" --type "Info"
+fileMove --from "${fileName}" --to "/IBMRPA/DONE/" --fileSystem ${googleDrive}
+logMessage --message "Writting the data gathered" --type "Info"
+endSub
+beginSub --name ProcessGDriveWeatherRequests
+googleDriveConnect --name WeatherRequests googleDrive=value
+getFiles --path "/IBMRPA/TODO" --fileSystem ${googleDrive} fileList=value
+setVar --name "${fileListLenght}" --value "${fileList.Count}"
+logMessage --message "\'Found ${fileListLenght} files!" --type "Info"
+repeat
+	get --collection "${fileList}" --index "${fileIndex}" fileName=value
+	logMessage --message "Downloading file: ${fileName}" --type "Info"
+	goSub --label processPDF
+	goSub --label moveFiles
+	evaluate --expression "${fileIndex}+1" fileIndex=value
+until --left "${fileIndex}" --operator "Less_Than_Equal_To" --right "${fileListLenght}"
+endSub"	qÄı¢_O“LÉ¶sáQ0Æ*21.0.2.2

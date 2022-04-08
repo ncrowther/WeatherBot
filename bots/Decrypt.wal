@@ -1,0 +1,50 @@
+
+	]‚¿z¬¾C è%:Œ²// Description
+//	Decrypt an encrypted text and return the result.
+// 
+// Input Variables
+//	in_encryptedText  - Encrypted text to be decrypted
+//	in_cypherKey  - the cypher key (16/24/32 chars)
+//	in_initVector  - the cy[pher initiialization vector (16 chars))
+//
+// Output Variables
+// 	out_success   - boolean value indicating success or failure
+// 	out_decryptedText      - the input text decrypted
+//
+defVar --name in_encryptedText --type String --value abc --parameter
+defVar --name in_cipherKey --type String --value "as@.@#XDilfontyl" --parameter
+defVar --name in_initVector --type String --value "qwerasdzxc.kjsnv" --parameter
+defVar --name out_decryptedText --type String --value pds6n6ip0VTA8h9amXOPJMQ4pRn7u10S --output
+defVar --name out_success --type Boolean --value True --output
+defVar --name textToDecrypt --type String --parameter
+defVar --name encryptionAES --type Cipher
+defVar --name encryptedMessage --type List --innertype Byte
+defVar --name bytesDecrypted --type List --innertype Byte
+textToBytes --text "${in_encryptedText}" --encoding "Default" encryptedMessage=value
+
+goSub --label createAES
+
+goSub --label decrypt
+
+beginSub --name createAES
+//Create an AES encryption.
+	cipherAes --key ${in_cipherKey} --iv ${in_initVector} out_success=success encryptionAES=value
+endSub
+
+beginSub --name decrypt
+	
+	
+//Decrypts the bytes of the message contained in ${encryptedMessage} and saves in ${bytesDecrypted}.
+	
+	decrypt --source ${encryptedMessage} --cipher ${encryptionAES} out_success=success bytesDecrypted=value
+	if --left "${out_success}" --operator "Is_True" --negate
+		logMessage --message "Failed to decrypt" --type "Error"
+		logMessage --message "${out_decryptedText}" --type "Info"
+		return
+	endIf
+	logMessage --message "${out_success}" --type "Info"
+	logMessage --message "${bytesDecrypted}" --type "Info"
+//Converts the decrypted bytes to text.
+	bytesToText --bytes ${bytesDecrypted} --convertiontype "Text" --encoding "Default" out_decryptedText=value
+	logMessage --message "${out_decryptedText}" --type "Info"
+endSub"	:¢Q4ÉF‡I‚¬ˆ_ÓÌ*21.0.2.2

@@ -1,0 +1,128 @@
+openapi: 3.0.1
+info:
+  title: RPA API
+  description: |-
+    This API presents an authenticated interface to invoke bot scripts both synchronously and asynchronously.  Authentication is enforced through Basic Auth (username/password).  Authentication is managed through a nodejs server script which has to be deployed in the DMZ. On invocation of the API, the server script checks the credentials against a LDAP database and if authenticated, forwards on the request to the specified RPA computer behind a firewall. The API has a loopback setting to simulate an RPA bot when an RPA environment is not available. ![Architecture](https://rpapi.eu-gb.mybluemix.net/Architecture.png)
+
+    Examples and labs- <br><br>[Presentation](/RPAWithAppConnect.pdf) <br>[Lab Guide](/labguide.pdf) <br>[Video](https://youtu.be/_BL6wobZlJ8) <br>[IBM RPA Agent API](https://www.ibm.com/docs/en/rpa/21.0?topic=bot-starting-bots-by-api-call) <br>[Git Repo](https://github.com/ncrowther/rpa-secure-gateway.git)
+  contact:
+    email: ncrowther@uk.ibm.com
+  version: 1.0.0
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+- url: http://e59d-89-241-108-197.ngrok.io
+tags:
+- name: API Facade for IBM rpaAgentUrl
+  description: Facade on top of IBM RPA
+  externalDocs:
+    description: Find out more
+    url: http://localhost:8080/docs
+paths:
+  /runsync:
+    post:
+      tags:
+      - RPA API
+      summary: Synchronously runs a script on a RPA agent specified in the URL.
+      description: Synchronously runs a script on a RPA agent specified in the URL.  All
+        requests are authenticated using Basic Auth.
+      operationId: runSyncScript
+      parameters:
+      - name: script
+        in: query
+        description: Bot script name to run.  This script must be published on the
+          tenant belonging to the host
+        required: true
+        schema:
+          type: string
+      - name: rpaAgentUrl
+        in: query
+        description: URL of the RPA agent. If set to LOOPBACK then 202 always returned
+          to simulate a succesful bot run.  If a URL, it must point to an RPA agent.  It
+          can point to either port 8099 (Direct) or 8096 (Broker). Script parameters
+          are passed in the request body.  See documentation https://www.ibm.com/docs/en/rpa/20.12?topic=bot-starting-bots-by-api-ca
+          for more details
+        required: true
+        schema:
+          type: string
+      - name: unlockMachine
+        in: query
+        description: True if unlock False otherwise
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Input parameters corresponding to the RPA bot script to be invoked.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RPARequest'
+        required: false
+      responses:
+        200:
+          description: Response for the execution of the bot.
+            Contains  the output parameters that are returned by the bot execution.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RPAResponse'
+        400:
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        404:
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        default:
+          description: Error occurring when invoking the execution of the decision
+            service operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      deprecated: false
+components:
+  schemas:
+    RPARequest:
+      type: object
+      properties:
+        in_region:
+          type: string
+          description: "Unique identifier of a patient"
+      description: Input parameters corresponding to the RPA bot script to be invoked.
+    RPAResponse:
+      type: object
+      properties:
+        out_success:
+          type: boolean
+          description: "true if success, false otherwise"
+        out_forecastDateTime:
+          type: string
+          description: "Date of forecast"
+        out_forecast:
+          type: string
+          description: "Forecast description"
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          description: HTTP error code.
+          format: int32
+        message:
+          type: string
+          description: Error message.
+        details:
+          type: string
+          description: Detailed error message.
+        errorCode:
+          type: string
+          description: Product error code.
+      description: Error occurring when invoking the execution of the decision service
+        operation.

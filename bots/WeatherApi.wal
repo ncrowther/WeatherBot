@@ -1,0 +1,74 @@
+
+	Ä"dª;]@•ñLP²Çt ƒ // Description
+//	Gets today's weather forecast for a specified region
+// 
+// Input Variables
+//	in_region  - The region for which the weather is required
+//
+// Output Variables
+// 	out_success                    - Boolean value indicating success or failure
+// 	out_forecastDateTime     - The forecast date and time
+// 	out_forecast                    - The forecast description
+//
+defVar --name in_region --type String --value 328328 --parameter 
+defVar --name out_success --type Boolean --output 
+defVar --name out_forecastDateTime --type String --output 
+defVar --name out_forecast --type String --output 
+defVar --name response --type String
+defVar --name statusCode --type Numeric
+defVar --name returnReason --type String
+defVar --name plainTextWeatherApiKey --type String
+defVar --name error --type Error
+defVar --name errorLineNumber --type Numeric
+defVar --name errorRoutineName --type String
+defVar --name decryptSuccess --type Boolean
+defVar --name extractionSuccess --type Boolean
+defVar --name extractedTable --type DataTable
+defVar --name tableRows --type Numeric
+defVar --name tableColumns --type Numeric
+defVar --name key --type String --value hsjkdlksjhjkjhgh
+defVar --name initializationVector --type String --value klsoikjdhyfukjsh
+defVar --name textToEncrypt --type String --value "Hello World"
+defVar --name encryptedWeatherApiKey --type String --value "[112,100,115,54,110,54,105,112,48,86,84,65,56,104,57,97,109,88,79,80,74,77,81,52,112,82,110,55,117,49,48,83]"
+defVar --name decryptedText --type String
+defVar --name prova --type String
+
+goSub --label callWeatherAPI
+goSub --label extractForecast
+
+beginSub --name callWeatherAPI
+
+getParameter --name WeatherAPIKEy --comment "Get the  weather API key" plainTextWeatherApiKey=value
+
+// Unencrypt the API key
+executeScript --handleError  --name Decrypt --parameters "in_encryptedText=${encryptedWeatherApiKey},in_cipherKey=hsjkdlksjhjkjhgh ,in_initVector=klsoikjdhyfukjsh" --output "out_decryptedText=${plainTextWeatherApiKey},out_success=${decryptSuccess}" out_success=value returnReason=errormessage errorLineNumber=linenumber errorRoutineName=errorsubname error=error
+//	executeScript --name Decrypt --parameters "in_cipherKey=${key},in_initVector=${initializationVector},in_encryptedText=${encryptedWeatherApiKey}" --output "out_decryptedText=${plainTextWeatherApiKey}" --version 7
+//	if --left "${decryptSuccess}" --operator "Is_True" --negate
+//		logMessage --message "Failed to decrypt" --type "Error"
+//		return
+//	endIf
+
+// Invoke the Weather API
+httpRequest --verb "Get" --url "http://dataservice.accuweather.com/forecasts/v1/daily/1day/${in_region}?apikey=${plainTextWeatherApiKey}" --cookiecontainer  out_success=success response=value statusCode=statusCode returnReason=reasonPhrase
+
+logMessage --message "Success: ${out_success} Response: ${response}  Reason: ${returnReason}" --type "Info"
+endSub
+
+beginSub --name extractForecast
+// Convert the json to a table and get the appropriate fields for the weather 
+
+jsonToTable --json "${response}" --jsonPath "$" extractionSuccess=success extractedTable=value tableRows=rows tableColumns=columns
+// logMessage --message "Success: ${extractionSuccess}\r\nRows: ${tableRows}\r\nColumns: ${tableColumns}\r\nTable: ${extractedTable}" --type "Info"
+
+getTableCell --dataTable ${extractedTable} --column 1 --row 1 out_forecast=value
+//logMessage --message "Cell Content: ${out_forecast}" --type "Info"
+
+jsonToTable --json "${out_forecast}" --jsonPath "$" extractionSuccess=success extractedTable=value tableRows=rows tableColumns=columns
+logMessage --message "Success: ${extractionSuccess}\r\nRows: ${tableRows}\r\nColumns: ${tableColumns}\r\nTable: ${extractedTable}" --type "Info"
+
+getTableCell --dataTable ${extractedTable} --column 1 --row 1 out_forecastDateTime=value
+logMessage --message "forecastDateTime: ${out_forecastDateTime}" --type "Info"
+
+getTableCell --dataTable ${extractedTable} --column 4 --row 1 out_forecast=value
+logMessage --message "forecast: ${out_forecast}" --type "Info"
+endSub"	ð’EM]fL§¶SŒ7Ãl*21.0.2.2

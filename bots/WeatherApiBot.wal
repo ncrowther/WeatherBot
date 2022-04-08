@@ -1,0 +1,57 @@
+
+	Ä"dª;]@•ñLP²Çt à// Description
+//	Gets today's weather forecast for a specified region
+// 
+// Input Variables
+//	in_region  - The region for which the weather is required
+//
+// Output Variables
+// 	out_success                    - Boolean value indicating success or failure
+// 	out_forecastDateTime     - The forecast date and time
+// 	out_forecast                    - The forecast description
+//
+defVar --name in_region --type String --value 328328 --parameter 
+defVar --name out_success --type Boolean --output 
+defVar --name out_forecastDateTime --type String --output 
+defVar --name out_forecast --type String --output 
+defVar --name response --type String
+defVar --name statusCode --type Numeric
+defVar --name returnReason --type String
+defVar --name plainTextWeatherApiKey --type String --value pds6n6ip0VTA8h9amXOPJMQ4pRn7u10S
+defVar --name error --type Error
+defVar --name errorLineNumber --type Numeric
+defVar --name errorRoutineName --type String
+defVar --name decryptSuccess --type Boolean
+defVar --name extractionSuccess --type Boolean
+defVar --name extractedTable --type DataTable
+defVar --name tableRows --type Numeric
+defVar --name tableColumns --type Numeric
+defVar --name key --type String --value hsjkdlksjhjkjhgh
+
+goSub --label callWeatherAPI
+goSub --label extractForecast
+
+beginSub --name callWeatherAPI
+
+// Invoke the Weather API
+httpRequest --verb "Get" --url "http://dataservice.accuweather.com/forecasts/v1/daily/1day/${in_region}?apikey=${plainTextWeatherApiKey}" out_success=success response=value statusCode=statusCode returnReason=reasonPhrase
+
+logMessage --message "Success: ${out_success} Response: ${response}  Reason: ${returnReason}" --type "Info"
+endSub
+
+beginSub --name extractForecast
+// Convert the json to a table and get the appropriate fields for the weather 
+
+jsonToTable --json "${response}" --jsonPath "$" extractionSuccess=success extractedTable=value tableRows=rows tableColumns=columns
+
+getTableCell --dataTable ${extractedTable} --column 1 --row 1 out_forecast=value
+
+jsonToTable --json "${out_forecast}" --jsonPath "$" extractionSuccess=success extractedTable=value tableRows=rows tableColumns=columns
+logMessage --message "Success: ${extractionSuccess}\r\nRows: ${tableRows}\r\nColumns: ${tableColumns}\r\nTable: ${extractedTable}" --type "Info"
+
+getTableCell --dataTable ${extractedTable} --column 1 --row 1 out_forecastDateTime=value
+logMessage --message "forecastDateTime: ${out_forecastDateTime}" --type "Info"
+
+getTableCell --dataTable ${extractedTable} --column 4 --row 1 out_forecast=value
+logMessage --message "forecast: ${out_forecast}" --type "Info"
+endSub"	ð’EM]fL§¶SŒ7Ãl*21.0.2.2

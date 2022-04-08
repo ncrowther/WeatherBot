@@ -1,0 +1,14 @@
+
+	`_ù»øÙJ«Á–|U6Ö¹defVar --name key --type String --value hsjkdlksjhjkjhgh
+defVar --name initializationVector --type String --value klsoikjdhyfukjsh
+defVar --name textToEncrypt --type String --value "Hello World"
+defVar --name encryptedText --type String --value "[112,100,115,54,110,54,105,112,48,86,84,65,56,104,57,97,109,88,79,80,74,77,81,52,112,82,110,55,117,49,48,83]"
+defVar --name decryptedText --type String
+defVar --name prova --type String
+inputBox --title "Insert Text To Decript" --prompt "Insert Text To Decript" --value "Hello World" textToEncrypt=value
+//encrypt
+executeScript --name Encrypt --parameters "in_key=${key},in_initializationVector=${initializationVector},in_textToEncrypt=${textToEncrypt}" --output "out_encryptedText=${encryptedText}" --version 1
+logMessage --message "${encryptedText}" --type "Info"
+//decrypt
+executeScript --name Decrypt --parameters "in_cipherKey=${key},in_initVector=${initializationVector},in_encryptedText=${encryptedText}" --output "out_decryptedText=${decryptedText}" --version 7
+logMessage --message "${decryptedText}" --type "Info""	à–älºB½/³²æèn&*21.0.2.2

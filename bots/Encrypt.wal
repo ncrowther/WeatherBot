@@ -1,0 +1,23 @@
+
+	½Râ‹ñ¸O«%Áoë„u”û// Description
+//	Encrypt plain text and set the value og the key in the Control Center
+//
+defVar --name successCrypt --type Boolean
+defVar --name key --type String --value hsjkdlksjhjkjhgh --parameter
+defVar --name initializationVector --type String --parameter
+defVar --name textToEncrypt --type String --value " Hello World" --parameter
+defVar --name ecryptedMessage --type List --innertype Byte
+defVar --name initVector --type String
+defVar --name plaintTextKey --type String
+defVar --name ApiKeyNAme --type String
+defVar --name encryptionAES --type Cipher
+inputBox --title "API Key name" --prompt "Enter API Key Name" ApiKeyName=value
+inputBox --title "Plain text key" --prompt "Enter Plain Text Key" plaintTextKey=value
+//Create an AES encryption.
+cipherAes --key ${key} --iv dfdfgesadfgfsdsa encryptionAES=value
+//Encrypt the "textToEncrypt" message using previously created encryption: "${ encryptionAES}".
+encrypt --source "${textToEncrypt}" --cipher ${encryptionAES} successCrypt=success ecryptedMessage=value
+logMessage --message "${successCrypt}" --type "Info"
+logMessage --message "${encryptionAES}" --type "Info"
+"	¤o‘î²Œ¸JˆlÝÐ5
+Ó*21.0.2.2
